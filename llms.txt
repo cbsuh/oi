@@ -1,0 +1,36 @@
+# oi Project - AI Context
+
+## Overview
+This is the repository for the `oi` programming language.
+`oi` is an experimental programming language designed specifically for AI-human collaboration. It aims to reduce ambiguity for AI models generating code, while maximizing readability for humans reviewing it.
+
+## Core Principles
+1. **One Canonical Form**: Unified formatting, exactly one way to write anything.
+2. **Explicit but Concise**: No hidden implicit behaviors or casting.
+3. **Intent-Declarative**: Contracts (`requires`/`ensures`) are first-class constructs.
+4. **Structured Metadata**: Machine-parseable annotations over free-form texts.
+5. **Effect Transparency**: All side effects are declared via the `with` keyword.
+
+## Additional Goals
+- **Self-Verifiable Code**: The compiler uses `requires`/`ensures` contracts to automatically verify generated code. This gives AI a built-in feedback loop for correctness.
+- **Bidirectional Collaboration**: Humans can write only signatures + contracts; AI fills in the implementation. Both directions of the AI-human workflow are supported.
+
+## Repository Structure
+- `docs/`: Core specifications and language design documentation. **Important:** Read these before suggesting new language features.
+  - `design-principles.md`: The 5 core principles + additional goals.
+  - `syntax-reference.md`: Complete syntax rules including visibility, traits, variables, and pipelines.
+  - `effect-system.md`: How the `with` keyword isolates side-effects.
+  - `error-handling.md`: How `Result[T, E]` is used instead of exceptions.
+  - `comparison.md`: `oi` compared to Rust, Go, Python, TypeScript.
+  - `roadmap.md`: Current project phase.
+  - `decisions/`: Architecture Decision Records (ADRs). **Read before proposing changes.**
+- `examples/`: Sample `oi` code snippets (WIP).
+- `README.md`: High-level entry point.
+
+## Technical constraints for generating `.oi` code
+- When writing `oi` code to assist users, ALWAYS declare effects explicitly.
+- Always handle `Result` types properly using pattern matching or the `?` operator.
+- Keep the `One Canonical Form` in mind: Do not hallucinate dynamic programming features, multiple inheritance, or implicit casting. Everything must be statically checkable.
+- `var` is only allowed inside function bodies for local state. Never use `var` in function parameters, return types, module-level declarations, or struct fields.
+- Everything is **private by default**. When writing modules or services, you MUST use `pub` to expose the intended public API functions and types. Do not leave everything private unless it's a purely internal script.
+- Use `trait` for polymorphism. Implement traits inline with `with Trait { ... }` at type definition, or use `impl Trait for Type { ... }` for external types. Never use implicit structural matching.

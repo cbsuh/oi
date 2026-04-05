@@ -1,0 +1,4 @@
+-- The simplest oi program
+fn main() with io {
+  io.println("Hello, World!")
+}

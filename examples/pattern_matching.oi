@@ -1,0 +1,31 @@
+type Shape =
+  | Circle { radius: Float }
+  | Rectangle { width: Float, height: Float }
+  | Triangle { base: Float, height: Float }
+
+fn area(shape: Shape) -> Float {
+  match shape {
+    Shape.Circle { radius }           => 3.14159 * radius * radius
+    Shape.Rectangle { width, height } => width * height
+    Shape.Triangle { base, height }   => 0.5 * base * height
+  }
+}
+
+fn describe(shape: Shape) -> String {
+  let size = match area(shape) {
+    a if a > 100.0 => "large"
+    a if a > 10.0  => "medium"
+    _              => "small"
+  }
+  "A {size} {shape.type_name()} with area {area(shape)}"
+}
+
+fn main() with io {
+  let shapes = [
+    Shape.Circle { radius: 5.0 },
+    Shape.Rectangle { width: 3.0, height: 4.0 },
+    Shape.Triangle { base: 6.0, height: 3.0 },
+  ]
+
+  shapes.each(|s| io.println(describe(s)))
+}

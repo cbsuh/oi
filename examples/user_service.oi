@@ -1,0 +1,35 @@
+module UserService
+  use core.{Result, Error}
+  use db.Connection
+
+pub type User {
+  id: UserId
+  name: String @max_length(100)
+  email: Email @unique
+  role: Role = Role.Member
+}
+
+pub type UserError =
+  | NotFound { id: UserId }
+  | InvalidEmail { email: String }
+  | AlreadyExists { email: Email }
+
+---
+purpose: "ID로 사용자를 조회한다"
+domain: user_management
+---
+pub fn find_user(id: UserId) -> Result[User, UserError]
+  with io, db
+  requires id.is_valid()
+{
+  let user = db.query("SELECT * FROM users WHERE id = ?", id)?
+  match user {
+    Some(u) => Ok(u)
+    None    => Err(UserError.NotFound { id })
+  }
+}
+
+test "존재하지 않는 유저 조회 시 NotFound" {
+  let result = find_user(UserId(9999))
+  assert result == Err(UserError.NotFound { id: UserId(9999) })
+}

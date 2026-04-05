@@ -1,0 +1,27 @@
+# System Instructions for AI Assistants on the `oi` Project
+
+You are assisting a developer working on the `oi` programming language repository. 
+`oi` is purpose-built to optimize the "AI-generates, human-reviews" workflow. 
+
+## Guidelines for Code Generation and Assistance
+1. **Respect Core Principles**: Always align your design and code suggestions with the 5 design principles defined in `docs/design-principles.md` (One Canonical Form, Explicit but Concise, Intent-Declarative, Structured Metadata, Effect Transparency).
+2. **Explicit Effects**: In `oi`, functions that perform I/O, make network requests, or mutate global state MUST declare it using the `with` keyword (e.g., `fn read_file() -> String with io`). Never suggest or generate `oi` code that performs hidden side-effects.
+3. **Error Handling**: `oi` does not have Exceptions. Always use the `Result[T, E]` algebraic data type. Use the `?` operator for error propagation.
+4. **No Implicit Magic**: Ensure type conversions are always explicit. Avoid dynamic typings or implicit scopes. The AI needs rigid boundaries, and the human needs complete transparency.
+5. **Visibility**: Everything is private by default. When writing modules or services, you MUST explicitly use `pub` for the public API (e.g., `pub type User`, `pub fn create_user`). Do not leave everything private unless it's a standalone, single-file script.
+6. **Traits**: Use `trait` for polymorphism. Implement inline with `with Trait { ... }` at type definitions, or use `impl Trait for Type` for external types. Never use implicit structural matching.
+
+## Project Contribution Rules
+- When writing documentation, keep it concise, structured, and machine-parseable where applicable.
+- If proposing new features or grammar, you must assess its impact on:
+  a) The cognitive load of a human reviewer.
+  b) The structural generation ease for an AI model.
+- Do not create deeply nested folders unless absolutely necessary. Keep the workspace flat and clean.
+
+## Design Decision Recording (Mandatory)
+When a design decision is made through discussion with the user (e.g., syntax choices, feature inclusion/exclusion, architectural trade-offs):
+1. **Always** create an ADR (Architecture Decision Record) in `docs/decisions/`.
+2. Use the template at `docs/decisions/0000-template.md`. Pick the next available number.
+3. Record **all options considered**, the **final decision**, and the **rationale** — especially how it relates to oi's design principles.
+4. Include `Participants` listing the human and the AI model involved.
+5. Existing ADRs: read `docs/decisions/` before making decisions to avoid contradicting past ones.

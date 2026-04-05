@@ -1,0 +1,15 @@
+fn fizzbuzz(n: Int) -> String {
+  match (n % 3, n % 5) {
+    (0, 0) => "FizzBuzz"
+    (0, _) => "Fizz"
+    (_, 0) => "Buzz"
+    _      => n.to_string()
+  }
+}
+
+fn main() with io {
+  let results = List.range(1, 101)
+    |> map(fizzbuzz)
+  
+  results.each(|s| io.println(s))
+}

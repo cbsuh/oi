@@ -1,0 +1,21 @@
+# Rust (향후 구현 시)
+/target/
+Cargo.lock
+
+# OS
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Build outputs
+*.exe
+*.dll
+*.so
+*.dylib
