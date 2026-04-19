@@ -10,8 +10,7 @@ fn fizzbuzz(n: Int) -> String {
 fn main()
   with io
 {
-  let results = List.range(1, 101)
+  List.range(1, 101)
     |> map(fizzbuzz)
-  
-  results.each(|s| io.println(s))
+    |> each(|s| io.println(s))
 }

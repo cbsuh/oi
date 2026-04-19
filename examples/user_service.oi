@@ -19,7 +19,7 @@ purpose: "ID로 사용자를 조회한다"
 domain: user_management
 ---
 pub fn find_user(id: UserId) -> Result[User, UserError]
-  with io, db
+  with db
   requires id.is_valid()
 {
   let user = db.query("SELECT * FROM users WHERE id = ?", id)?

@@ -17,7 +17,12 @@ fn describe(shape: Shape) -> String {
     a if a > 10.0  => "medium"
     _              => "small"
   }
-  "A {size} {shape.type_name()} with area {area(shape)}"
+  let name = match shape {
+    Shape.Circle { .. }    => "Circle"
+    Shape.Rectangle { .. } => "Rectangle"
+    Shape.Triangle { .. }  => "Triangle"
+  }
+  "A {size} {name} with area {area(shape)}"
 }
 
 fn main()
@@ -29,5 +34,5 @@ fn main()
     Shape.Triangle { base: 6.0, height: 3.0 },
   ]
 
-  shapes.each(|s| io.println(describe(s)))
+  shapes |> each(|s| io.println(describe(s)))
 }
