@@ -20,7 +20,9 @@ fn describe(shape: Shape) -> String {
   "A {size} {shape.type_name()} with area {area(shape)}"
 }
 
-fn main() with io {
+fn main()
+  with io
+{
   let shapes = [
     Shape.Circle { radius: 5.0 },
     Shape.Rectangle { width: 3.0, height: 4.0 },

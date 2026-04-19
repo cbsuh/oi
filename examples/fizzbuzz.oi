@@ -7,7 +7,9 @@ fn fizzbuzz(n: Int) -> String {
   }
 }
 
-fn main() with io {
+fn main()
+  with io
+{
   let results = List.range(1, 101)
     |> map(fizzbuzz)
   

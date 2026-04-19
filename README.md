@@ -32,7 +32,9 @@ fn fizzbuzz(n: Int) -> String {
   }
 }
 
-fn main() with io {
+fn main()
+  with io
+{
   List.range(1, 101)
     |> map(fizzbuzz)
     |> each(|s| io.println(s))

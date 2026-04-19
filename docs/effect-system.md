@@ -23,7 +23,9 @@ pub trait Storage {
   fn write(key: String, value: Bytes) -> Result[(), StorageError]
 }
 
-fn cache_user(user: User) -> Result[(), StorageError] with Storage {
+fn cache_user(user: User) -> Result[(), StorageError]
+  with Storage
+{
   Storage.write(user.id.to_string(), user.serialize())?
   Ok(())
 }

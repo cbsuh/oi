@@ -108,7 +108,9 @@ Use traits to constrain generic type parameters:
 
 ```oi
 fn sort[T: Comparable](list: List[T]) -> List[T] { ... }
-fn print_all[T: Printable](items: List[T]) with io { ... }
+fn print_all[T: Printable](items: List[T])
+  with io
+{ ... }
 ```
 
 ## Functions
@@ -121,7 +123,9 @@ fn add(a: Int, b: Int) -> Int {
 }
 
 -- Effectful function: side effects declared via `with`
-fn save_user(user: User) -> Result[UserId, DbError] with db {
+fn save_user(user: User) -> Result[UserId, DbError]
+  with db
+{
   db.insert(user)
 }
 ```
@@ -139,10 +143,12 @@ fn divide(a: Float, b: Float) -> Float
 ```
 
 ## Effect Declarations
-Side effects are declared using the `with` keyword. 
+Side effects are declared using the `with` keyword. The `with` clause is always placed on its own line, indented by 2 spaces below the function signature (see ADR-0009).
 
 ```oi
-fn print_message(msg: String) with io {
+fn print_message(msg: String)
+  with io
+{
   io.println(msg)
 }
 ```
