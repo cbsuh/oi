@@ -224,6 +224,26 @@ match (value) {
 }
 ```
 
+`match` is an **expression** — it evaluates to a value and can be used anywhere an expression is expected, including `let` bindings:
+
+```oi
+let label = match area(shape) {
+  a if a > 100.0 => "large"
+  a if a > 10.0  => "medium"
+  _              => "small"
+}
+```
+
+When matching an ADT variant but ignoring its fields, use `{ .. }`:
+
+```oi
+let name = match shape {
+  Shape.Circle { .. }    => "Circle"
+  Shape.Rectangle { .. } => "Rectangle"
+  Shape.Triangle { .. }  => "Triangle"
+}
+```
+
 ## Lambdas and Closures
 Anonymous functions use the `|args| body` syntax (Rust/Ruby style). Arrow functions (`=>`) are intentionally not used to prevent confusion with `match` arms.
 
@@ -252,6 +272,43 @@ let results = List.range(1, 101)
   |> map(fizzbuzz)
   |> filter(|s| s != "")
 ```
+
+### Standard Collection Functions
+
+The following functions operate on collections and are called via the pipeline operator `|>` (see ADR-0010):
+
+| Function | Description |
+|----------|-------------|
+| `map(f)` | Transform each element |
+| `filter(f)` | Keep elements where `f` returns true |
+| `each(f)` | Execute `f` for each element (for side effects) |
+| `flat_map(f)` | Map and flatten one level |
+| `reduce(init, f)` | Accumulate elements into a single value |
+| `fold(init, f)` | Alias for `reduce` |
+
+```oi
+-- ✅ Canonical: pipeline style
+List.range(1, 101)
+  |> map(fizzbuzz)
+  |> each(|s| io.println(s))
+
+-- ✅ Single operation also uses pipeline
+shapes |> each(|s| io.println(describe(s)))
+```
+
+### Pipeline `|>` vs Dot `.` Notation
+
+Dot notation (`.`) is reserved for **methods defined on types** via trait implementations (e.g., `n.to_string()`, `list.length`). The pipeline `|>` is used for **standalone functions** that receive data as their first argument.
+
+```oi
+-- `.` = type-owned method
+let s = n.to_string()
+
+-- `|>` = standalone function
+let doubled = numbers |> map(|x| x * 2)
+```
+
+> **Rule**: Collection operations (`map`, `filter`, `each`, etc.) are always invoked via `|>`, never via dot notation. This follows the "One Canonical Form" principle — there is exactly one way to express data transformation pipelines.
 
 ## Tests
 Testing is a first-class citizen using `test` for unit testing and `property` for property-based testing.
