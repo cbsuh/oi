@@ -38,6 +38,77 @@ type InternalCache { ... }
 
 **Rule**: If AI forgets `pub`, the item stays private (safe). This is intentional — exposing an API should be a conscious decision.
 
+## Primitive Types
+
+oi has a small, fixed set of built-in primitive types (ADR-0016):
+
+| Type | Description | Default Size |
+|------|-------------|-------------|
+| `Int` | Signed integer | 64-bit (alias for `Int64`) |
+| `Float` | IEEE 754 floating point | 64-bit (alias for `Float64`) |
+| `Bool` | Boolean | `true` or `false` |
+| `String` | UTF-8 text | Variable length |
+| `Unit` | No meaningful value | Single value: `Unit` |
+
+### Fixed-Width Numeric Types (Opt-in)
+
+For FFI, binary protocols, or performance-critical code, fixed-width types are available:
+
+| Signed | Unsigned | Floating |
+|--------|----------|----------|
+| `Int8` | `UInt8` | `Float32` |
+| `Int16` | `UInt16` | `Float64` |
+| `Int32` | `UInt32` | |
+| `Int64` | `UInt64` | |
+
+```oi
+let count: Int = 42          -- 64-bit signed (default)
+let pi: Float = 3.14159      -- 64-bit float (default)
+let active: Bool = true
+let name: String = "Alice"
+
+-- Fixed-width when needed
+let byte: UInt8 = 255
+let offset: Int32 = -128
+let precise: Float32 = 1.0
+```
+
+> **Rule**: AI should always use `Int` and `Float` by default. Use fixed-width types only when the domain explicitly requires them (e.g., network protocols, binary serialization).
+
+### No `Char` Type
+
+oi does not have a separate character type. All text is `String`. Single characters are length-1 strings. This eliminates `'a'` vs `"a"` quoting ambiguity.
+
+```oi
+let initial: String = "A"   -- ✅ Correct
+-- let initial: Char = 'A'  -- ❌ Does not exist in oi
+```
+
+## Numeric Literals
+
+oi supports standard numeric literal formats. The `_` separator can be used anywhere in a number for readability.
+
+```oi
+-- Integer literals
+let decimal = 42
+let million = 1_000_000
+let hex = 0xFF
+let binary = 0b1010_0101
+let octal = 0o777
+
+-- Float literals
+let pi = 3.14159
+let avogadro = 6.022e23
+let tiny = 1.5e-10
+let formatted = 1_000.50
+
+-- Boolean literals
+let yes = true
+let no = false
+```
+
+> **Note**: oi does not support type suffixes (e.g., `42u8`). When a specific type is needed, use an explicit type annotation: `let b: UInt8 = 255`.
+
 ## Types
 Types in `oi` are strictly defined and support Records, Algebraic Data Types (ADTs), Generics, and Structural Metadata annotations.
 
@@ -62,6 +133,28 @@ type PaymentStatus =
 -- Result[T, E] = Ok(T) | Err(E)
 -- Option[T] = Some(T) | None
 ```
+
+## Collections and Literals
+
+oi provides four collection types. `List` and `Tuple` have literal syntax; `Map` and `Set` use named constructors (ADR-0016).
+
+```oi
+-- List: ordered, homogeneous, bracket literal
+let numbers = [1, 2, 3]                              -- List[Int]
+let names = ["Alice", "Bob"]                          -- List[String]
+
+-- Tuple: fixed-size, heterogeneous, parenthesis literal
+let pair = (1, "hello")                               -- Tuple[Int, String]
+let triple = (true, 42, "ok")                         -- Tuple[Bool, Int, String]
+
+-- Map: key-value, named constructor
+let ages = Map.from([("Alice", 30), ("Bob", 25)])      -- Map[String, Int]
+
+-- Set: unique elements, named constructor
+let tags = Set.from(["urgent", "bug"])                 -- Set[String]
+```
+
+> **Rule**: `[]` is for List literals and indexing. `()` is for Tuple literals. Map and Set always use `Type.from(...)` constructors — no special sigils.
 
 ## Traits and Interfaces
 
@@ -213,7 +306,7 @@ let first = items[0]
 > **Note**: Even though `[]` is also used for Generics (`List[Int]`), there is no ambiguity because `oi` enforces that type names start with an uppercase letter, while identifiers and values do not.
 
 ## Conditional Expressions
-`if`/`else` is an **expression** — it returns a value. Braces are always required. There is no ternary operator (`?:`) because `if`/`else` expressions make it redundant (see ADR-0014).
+`if`/`else` is an **expression** — it returns a value. Braces are always required. There is no ternary operator (`?:`) because `if`/`else` expressions make it redundant (see ADR-0014). An `if` without `else` evaluates to `Unit`.
 
 ```oi
 -- if/else returns a value
@@ -233,7 +326,7 @@ fn abs(x: Int) -> Int {
   if x >= 0 { x } else { -x }
 }
 
--- Without else: evaluates to Unit `()`
+-- Without else: evaluates to Unit
 if should_log {
   log.info("event occurred")
 }
@@ -255,7 +348,7 @@ if (a > 1) || (a == -1) { ... }
 
 ## Loops
 
-oi provides two loop constructs: `for` (collection/range iteration) and `while` (conditional repetition). Loops are **statements** — they always return Unit `()`. There is no `break` or `continue`; all early termination is handled by pipeline operations like `find`, `take_while`, and `filter` (see ADR-0015).
+oi provides two loop constructs: `for` (collection/range iteration) and `while` (conditional repetition). Loops are **statements** — they always return `Unit`. There is no `break` or `continue`; all early termination is handled by pipeline operations like `find`, `take_while`, and `filter` (see ADR-0015).
 
 ### `for` — Collection and Range Iteration
 

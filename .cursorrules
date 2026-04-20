@@ -13,6 +13,10 @@ You are assisting a developer working on the `oi` programming language repositor
 7. **Conditional Expressions**: `if`/`else` is an expression that returns a value. Braces are always required. Do not use or suggest a ternary operator (`?:`). Use `else if`, not `elif`.
 8. **Control Flow Parentheses**: Do NOT place parentheses around conditions or subjects for `if`, `match`, `for`, or `while`. Write `if x > 0 { ... }`, not `if (x > 0) { ... }`. Write `match value { ... }`, not `match (value) { ... }`. Expression grouping parentheses inside conditions are fine (e.g., `if (a > 1) || (a == -1) { ... }`).
 9. **Loops**: Use `for x in collection { ... }` for iteration and `while condition { ... }` for conditional repetition. Do NOT use `break` or `continue` — they do not exist in oi. For early termination, use pipeline operations (`find`, `take_while`, `filter`). For infinite event loops, use `actor`. Use `..` for exclusive ranges and `..=` for inclusive ranges (e.g., `for i in 0..10`).
+10. **Primitive Types**: Default to `Int` (64-bit signed) and `Float` (64-bit). Use fixed-width types (`Int32`, `UInt8`, `Float32`, etc.) only when the domain explicitly requires them (FFI, binary protocols). There is no `Char` type — all text is `String`. The unit type is `Unit` (not `()`).
+11. **Numeric Literals**: Support decimal (`42`), hex (`0xFF`), binary (`0b1010`), octal (`0o777`), `_` separators (`1_000_000`), and scientific notation (`6.022e23`). Do NOT use type suffixes like `42u8` — use explicit type annotations instead (`let b: UInt8 = 255`).
+12. **Collection Literals**: Use `[]` for List literals, `()` for Tuple literals. Map and Set use named constructors: `Map.from([...])` and `Set.from([...])`. Do NOT invent special sigils like `#{}` or `#{}`.
+13. **Unit Type**: Use `Unit` (not `()`) for functions that return no meaningful value. Write `-> Unit`, not `-> ()`. `Unit` is both the type and the value.
 ## Project Contribution Rules
 - When writing documentation, keep it concise, structured, and machine-parseable where applicable.
 - If proposing new features or grammar, you must assess its impact on:

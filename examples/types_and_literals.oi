@@ -1,0 +1,104 @@
+-- Basic Types and Literals Example (ADR-0016)
+
+module TypesDemo
+  use core.{Result, Map, Set}
+
+-- Primitive types
+fn primitives_demo()
+  with io
+{
+  let count: Int = 42
+  let pi: Float = 3.14159
+  let active: Bool = true
+  let name: String = "Alice"
+
+  io.println("count: {count}, pi: {pi}, active: {active}, name: {name}")
+}
+
+-- Numeric literal formats
+fn numeric_literals()
+  with io
+{
+  -- Integer literals
+  let decimal = 1_000_000
+  let hex = 0xFF
+  let binary = 0b1010_0101
+  let octal = 0o755
+
+  -- Float literals
+  let avogadro = 6.022e23
+  let tiny = 1.5e-10
+  let formatted = 1_000.50
+
+  io.println("decimal: {decimal}, hex: {hex}, binary: {binary}, octal: {octal}")
+  io.println("avogadro: {avogadro}, tiny: {tiny}, formatted: {formatted}")
+}
+
+-- Fixed-width types (opt-in for specific domains)
+fn fixed_width_demo()
+  with io
+{
+  let byte: UInt8 = 255
+  let offset: Int32 = -128
+  let precise: Float32 = 1.0
+
+  io.println("byte: {byte}, offset: {offset}, precise: {precise}")
+}
+
+-- No Char type — all text is String
+fn string_only()
+  with io
+{
+  let initial: String = "A"
+  let emoji: String = "🎉"
+  let greeting = "Hello, {initial}! {emoji}"
+
+  io.println(greeting)
+}
+
+-- Collection literals
+fn collections_demo()
+  with io
+{
+  -- List: bracket literal
+  let numbers = [1, 2, 3, 4, 5]
+
+  -- Tuple: parenthesis literal
+  let pair = (1, "hello")
+  let triple = (true, 42, "ok")
+
+  -- Map: named constructor
+  let ages = Map.from([("Alice", 30), ("Bob", 25)])
+
+  -- Set: named constructor
+  let tags = Set.from(["urgent", "bug", "frontend"])
+
+  io.println("numbers: {numbers}")
+  io.println("pair: {pair}")
+  io.println("ages: {ages}")
+  io.println("tags: {tags}")
+}
+
+-- Unit type: functions with no meaningful return value
+fn log_event(event: String) -> Unit
+  with io
+{
+  io.println("[LOG] {event}")
+}
+
+-- Unit in generics
+fn save_config(config: Map[String, String]) -> Result[Unit, String] {
+  -- Simulate saving
+  Ok(Unit)
+}
+
+fn main()
+  with io
+{
+  primitives_demo()
+  numeric_literals()
+  fixed_width_demo()
+  string_only()
+  collections_demo()
+  log_event("all demos completed")
+}
