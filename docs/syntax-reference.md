@@ -212,11 +212,52 @@ let first = items[0]
 ```
 > **Note**: Even though `[]` is also used for Generics (`List[Int]`), there is no ambiguity because `oi` enforces that type names start with an uppercase letter, while identifiers and values do not.
 
+## Conditional Expressions
+`if`/`else` is an **expression** — it returns a value. Braces are always required. There is no ternary operator (`?:`) because `if`/`else` expressions make it redundant (see ADR-0014).
+
+```oi
+-- if/else returns a value
+let category = if score >= 90 {
+  "excellent"
+} else if score >= 70 {
+  "good"
+} else {
+  "needs improvement"
+}
+
+-- Single-line form (braces still required)
+let sign = if x > 0 { "+" } else { "-" }
+
+-- As the last expression in a function
+fn abs(x: Int) -> Int {
+  if x >= 0 { x } else { -x }
+}
+
+-- Without else: evaluates to Unit `()`
+if should_log {
+  log.info("event occurred")
+}
+```
+
+### Control Flow Parentheses Rule
+Control flow keywords (`if`, `match`, `for`) do **not** require parentheses around their condition or subject (see ADR-0014). Expression grouping parentheses are allowed but `oi-fmt` strips unnecessary outermost parentheses.
+
+```oi
+-- ✅ Canonical form
+if age >= 18 { ... }
+
+-- ⚠️ Valid but oi-fmt simplifies to the above
+if (age >= 18) { ... }
+
+-- ✅ Internal grouping parentheses are preserved
+if (a > 1) || (a == -1) { ... }
+```
+
 ## Pattern Matching
 Pattern matching replaces complex `if-else` chains. Exhaustive matching is required. You can add extra conditional logic using `if` guards.
 
 ```oi
-match (value) {
+match value {
   1 => "One"
   2 => "Two"
   x if x > 10 => "Greater than ten"

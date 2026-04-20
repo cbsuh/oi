@@ -10,6 +10,8 @@ You are assisting a developer working on the `oi` programming language repositor
 4. **No Implicit Magic**: Ensure type conversions are always explicit. Avoid dynamic typings or implicit scopes. The AI needs rigid boundaries, and the human needs complete transparency.
 5. **Visibility**: Everything is private by default. When writing modules or services, you MUST explicitly use `pub` for the public API (e.g., `pub type User`, `pub fn create_user`). Do not leave everything private unless it's a standalone, single-file script.
 6. **Traits**: Use `trait` for polymorphism. Implement inline with `with Trait { ... }` at type definitions, or use `impl Trait for Type` for external types. Never use implicit structural matching.
+7. **Conditional Expressions**: `if`/`else` is an expression that returns a value. Braces are always required. Do not use or suggest a ternary operator (`?:`). Use `else if`, not `elif`.
+8. **Control Flow Parentheses**: Do NOT place parentheses around conditions or subjects for `if`, `match`, or `for`. Write `if x > 0 { ... }`, not `if (x > 0) { ... }`. Write `match value { ... }`, not `match (value) { ... }`. Expression grouping parentheses inside conditions are fine (e.g., `if (a > 1) || (a == -1) { ... }`).
 
 ## Project Contribution Rules
 - When writing documentation, keep it concise, structured, and machine-parseable where applicable.
