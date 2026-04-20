@@ -9,7 +9,8 @@ Every side-effecting capability is represented as an *Effect*. When a function r
 While custom effects might be considered later, standard ones include:
 - `io`: File, Network, and standard I/O streams.
 - `db`: Database access or transactions.
-- `async`: For asynchronous coroutine suspension.
+- `spawn`: For creating and communicating with actors (ADR-0013).
+- `concurrent`: For structured parallel execution of independent tasks (ADR-0013).
 - `log`: Telemetry and logging.
 - `crypto`: Cryptographic operations requiring entropy.
 
