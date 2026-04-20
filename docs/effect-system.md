@@ -5,34 +5,107 @@ In `oi`, "Effect Transparency" is a core principle. Functions cannot unexpectedl
 ## The `with` Keyword
 Every side-effecting capability is represented as an *Effect*. When a function requires an effect, it declares it using the `with` keyword.
 
-### Available Effects
-While custom effects might be considered later, standard ones include:
-- `io`: File, Network, and standard I/O streams.
+### Standard Effects
+
+oi provides the following standard effects (ADR-0018):
+
+**Independent effects:**
 - `db`: Database access or transactions.
-- `spawn`: For creating and communicating with actors (ADR-0013).
-- `concurrent`: For structured parallel execution of independent tasks (ADR-0013).
 - `log`: Telemetry and logging.
 - `crypto`: Cryptographic operations requiring entropy.
+- `spawn`: For creating and communicating with actors (ADR-0013).
+- `concurrent`: For structured parallel execution of independent tasks (ADR-0013).
 
-### Custom Effects (Planned)
-Custom effects will be built on top of the `trait` system (see ADR-0004). A custom effect is essentially a trait that defines a set of capabilities a function requires from its environment.
+**Fine-grained I/O effects:**
+- `network`: HTTP, TCP, UDP, DNS operations.
+- `fs`: File system read/write.
+- `stdout`: Standard output.
+- `stderr`: Standard error.
+
+**Convenience group:**
+- `io`: Equivalent to `network + fs + stdout + stderr`. Use for scripts, `main()`, and prototyping. In production code, prefer fine-grained effects.
 
 ```oi
--- Possible future syntax (not yet finalized):
-pub trait Storage {
-  fn read(key: String) -> Result[Bytes, StorageError]
-  fn write(key: String, value: Bytes) -> Result[(), StorageError]
-}
+-- Fine-grained (production code)
+fn fetch(url: String) -> Result[String, HttpError]
+  with network
+{ ... }
 
-fn cache_user(user: User) -> Result[(), StorageError]
-  with Storage
+fn read_config(path: String) -> Result[Config, IoError]
+  with fs
+{ ... }
+
+-- Convenience group (scripts, main)
+fn main()
+  with io                    -- io ⊃ network, fs, stdout, stderr
 {
-  Storage.write(user.id.to_string(), user.serialize())?
-  Ok(())
+  let data = fetch("https://api.example.com")?   -- ✅ io includes network
+  io.println(data)
 }
 ```
 
-> **Note**: Whether custom effects reuse the `trait` keyword or introduce a dedicated `effect` keyword will be decided during implementation (Phase 2). The distinction matters if advanced features like effect handlers are introduced later.
+### Effect Propagation
+
+Effects propagate **manually with compiler verification** (ADR-0018). Every function must declare all effects it uses, including transitive effects from callees. The compiler emits an error if an effect is missing.
+
+```oi
+fn save_user(user: User) -> Result[Unit, DbError]
+  with db
+{
+  db.insert(user)
+}
+
+fn register(name: String) -> Result[Unit, DbError]
+  with db              -- Required: save_user needs `db`
+{
+  let user = User.new(name)
+  save_user(user)?
+}
+
+-- If `with db` is omitted from register():
+-- ERROR: register() calls save_user() which requires `db` effect
+```
+
+> **Rule**: A function's `with` clause must be the **complete** set of effects it requires. The compiler verifies this against all callees. No automatic inference — visibility is the design goal.
+
+### Effect Hierarchy Rules
+
+- `with io` satisfies callees that require `network`, `fs`, `stdout`, or `stderr`.
+- `with network` does **not** satisfy callees that require `fs` — they are independent.
+- Non-I/O effects (`db`, `log`, `crypto`, `spawn`, `concurrent`) are always independent.
+
+```oi
+fn process()
+  with db, network     -- ✅ db is independent, network is fine-grained
+{ ... }
+
+fn main()
+  with io, db          -- ✅ io covers network/fs/stdout/stderr; db is separate
+{
+  process()?           -- ✅ io includes network, db is declared
+}
+```
+
+### Custom Effects (Deferred to Phase 2+)
+
+Custom effect syntax is deferred until Phase 2 implementation provides experience to evaluate the design trade-offs. The choice between reusing `trait` or introducing a dedicated `effect` keyword remains open (ADR-0018).
+
+```oi
+-- Possible future syntax (not yet finalized):
+-- Option A: trait-based
+pub trait Storage {
+  fn read(key: String) -> Result[Bytes, StorageError]
+  fn write(key: String, value: Bytes) -> Result[Unit, StorageError]
+}
+
+-- Option B: effect keyword
+pub effect Storage {
+  fn read(key: String) -> Result[Bytes, StorageError]
+  fn write(key: String, value: Bytes) -> Result[Unit, StorageError]
+}
+```
+
+> **Note**: The standard effects listed above are sufficient for Phase 2. Custom effects will be designed when implementation experience reveals the right abstraction.
 
 ## Pure vs Effectful Functions
 - **Pure Functions**: A function without a `with` clause is strictly pure. Given the same inputs, it guarantees the same outputs and performs no side-effects. This means AIs can safely cache, replace, or optimize them.
@@ -61,10 +134,10 @@ In `oi`, you simply list the required capabilities. There is no stack order, no 
 
 ```oi
 fn get_user(uid: UserId) -> Result[User, AppError]
-  with io, db, log, config
+  with db, log, network
 {
   log.info("Fetching user")
-  let user = db.query(config.db_url, uid)?
+  let user = db.query(uid)?
   Ok(user)
 }
 ```

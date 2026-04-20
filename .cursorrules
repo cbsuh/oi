@@ -19,6 +19,9 @@ You are assisting a developer working on the `oi` programming language repositor
 13. **Unit Type**: Use `Unit` (not `()`) for functions that return no meaningful value. Write `-> Unit`, not `-> ()`. `Unit` is both the type and the value.
 14. **Modules**: Every `.oi` file must start with `module ModuleName`. One module per file. File names are `snake_case`, module names are `PascalCase` (`user_service.oi` → `module UserService`). No nested modules — use directories for sub-modules.
 15. **Imports**: Use `use` with individual (`use core.Result`), grouped (`use core.{Result, Error}`), or aliased (`use db.Connection as Conn`) forms. Do NOT use wildcards (`use core.*` is forbidden). Every imported symbol must be explicitly listed.
+16. **Effect Propagation**: Every function must declare ALL effects in its `with` clause, including transitive effects from callees. The compiler errors on missing effects. No automatic inference — visibility is the goal.
+17. **Effect Hierarchy**: Standard effects are `db`, `log`, `crypto`, `spawn`, `concurrent` (independent) and `network`, `fs`, `stdout`, `stderr` (fine-grained I/O). `io` is a convenience group equivalent to `network + fs + stdout + stderr`. Prefer fine-grained effects in production code; use `io` for scripts and `main()`.
+18. **Custom Effects**: Not yet available. Only use the standard effects listed above. Custom effect syntax (`trait` vs `effect` keyword) is deferred to Phase 2+.
 ## Project Contribution Rules
 - When writing documentation, keep it concise, structured, and machine-parseable where applicable.
 - If proposing new features or grammar, you must assess its impact on:

@@ -20,14 +20,12 @@
 - [x] 모듈 ↔ 파일 관계 (명시적 1:1, 중첩 없음) → **ADR-0017**
 - [x] `use` 규칙 (개별/그룹/aliasing, 와일드카드 금지) → **ADR-0017**
 - [x] 패키지 구조 (디렉토리 = 네임스페이스, `oi.toml` Phase 3+) → **ADR-0017**
+- [x] Effect 전파 (수동 선언 + 컴파일러 검증) → **ADR-0018**
+- [x] `without` 미도입 (Phase 1) → **ADR-0018**
+- [x] Effect 계층 (세분화 + `io` 편의 그룹) → **ADR-0018**
+- [x] Custom Effect (Phase 2+로 연기) → **ADR-0018**
 
 ## 🔴 Tier 1 — Phase 2 파서 착수 전 반드시 결정
-
-### Effect System 정밀 문법
-- [ ] Effect 합성/전파 규칙: callee의 effect가 caller에 자동 전파되는가?
-- [ ] Effect 제한: `without` 메커니즘 필요 여부
-- [ ] Effect 계층: `io`가 `network`를 포함하는 등의 상하 관계
-- [ ] Custom Effect 문법: `trait`으로 할지 `effect` 키워드를 쓸지
 
 ### `actor` / `concurrent` 구체 문법
 - [ ] `actor` 선언 문법 확정 (최상위 키워드? `state` 필드?)
