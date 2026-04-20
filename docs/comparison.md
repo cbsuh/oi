@@ -1,17 +1,35 @@
 # Comparison with Other Languages
 
 ## Overview
-How does `oi` compare to existing programming languages? As a language tailored for AI-human pairing, `oi` carefully borrows the best practices of modern languages while intentionally discarding certain paradigms.
 
-## What we Adopted
+`oi` is not built from scratch — it stands on the shoulders of proven languages. Its closest ancestor is **Elixir/Erlang**: the actor model, per-process GC, immutability-first design, and pipeline-oriented data flow all come directly from the BEAM ecosystem. Where `oi` diverges is in addressing Elixir's practical pain points — dynamic typing, invisible side effects, inconsistent error handling — by reinforcing the same philosophy with static types, an effect system, and Design-by-Contract.
 
-| Source Concept | Feature | oi Counterpart |
-|------|------|--------------|
-| **Rust** | `Result`-based error handling, `?` operator | Identical adoption |
-| **Rust / ML** | Algebraic Data Types (ADTs), Exhaustive Pattern Matching | Identical adoption |
-| **Go** | A strict "One Canonical Form" for style formatting | Built directly into the language spec |
+From other languages, `oi` adopts Rust's type-safe error handling, Go's one-canonical-form ethos, and Eiffel's contract system.
+
+## What we Inherited
+
+| Source | What we took | oi Counterpart |
+|--------|-------------|----------------|
+| **Elixir / Erlang** | Actor-based concurrency, message passing | `actor` + `spawn` (ADR-0013) |
+| **Elixir / Erlang** | Per-process GC, isolated heaps | Identical architecture (ADR-0012) |
+| **Elixir / Erlang** | Immutability by default | `let` by default, `var` local-only |
 | **Elixir / F#** | Data pipeline `\|>` operator | Identical adoption |
-| **Eiffel / Spark**| Design by Contract (`requires`/`ensures`) | Core syntax primitives |
+| **Rust** | `Result`-based error handling, `?` operator | Identical adoption |
+| **Rust / ML** | ADTs, Exhaustive Pattern Matching | Identical adoption |
+| **Go** | One Canonical Form for formatting | Built into the language spec |
+| **Eiffel / Spark** | Design by Contract (`requires`/`ensures`) | Core syntax primitives |
+
+## What we Fixed (vs. Elixir)
+
+Elixir got the big architectural decisions right. But real-world Elixir development has recurring friction points that `oi` addresses:
+
+| Elixir's Weakness | The Problem | oi's Fix |
+|-------------------|-------------|----------|
+| **Dynamic typing** | Types checked at runtime. Dialyzer is optional, slow, and its error messages are notoriously cryptic. AI cannot catch type mismatches at generation time. | Static type system with generics and trait-based polymorphism. |
+| **Error handling duality** | Three coexisting patterns: `{:ok, val}`/`{:error, reason}` tuples, `!` bang functions that raise, and `with` macro chains. No single canonical way. | `Result[T, E]` + `?` operator. Exceptions do not exist. One way only. |
+| **Invisible side effects** | Any function can freely perform IO, DB access, or network calls. The function signature reveals nothing about side effects. | `with` effect declarations. A function without `with` is guaranteed pure. |
+| **No contracts** | No built-in mechanism to express preconditions or postconditions. Guards are limited to basic type checks and a few operators. | First-class `requires`/`ensures` in function signatures. |
+| **Macro-driven DSLs** | Phoenix, Ecto, and Absinthe each introduce their own macro-based DSL. Code often looks nothing like standard Elixir, requiring per-library learning. | No macro system. Structured metadata (`---` blocks) and annotations (`@`) handle metaprogramming needs. |
 
 ## What we Discarded
 
@@ -25,6 +43,67 @@ How does `oi` compare to existing programming languages? As a language tailored 
 | **Dependent Types** | Math theorem proving is required. Undecidable type inference. | Simple `requires` / `ensures` runtime assertions. |
 
 ## Detailed Comparisons
+
+### vs. Elixir
+- **Relationship**: Elixir is `oi`'s closest ancestor. The actor model, per-process GC, immutability-first design, and pipeline operator all originate from the BEAM ecosystem.
+- **What oi fixes**: Static types, unified error handling, effect tracking, and Design-by-Contract address Elixir's practical friction points.
+
+**Error handling — three ways vs. one way:**
+```elixir
+# Elixir: three coexisting patterns for the same operation
+
+# Pattern 1: tuple matching
+case Repo.get(User, id) do
+  nil -> {:error, :not_found}
+  user -> {:ok, user}
+end
+
+# Pattern 2: bang function (raises on failure)
+user = Repo.get!(User, id)
+
+# Pattern 3: with macro
+with {:ok, user} <- fetch_user(id),
+     {:ok, order} <- create_order(user) do
+  {:ok, order}
+end
+```
+
+```oi
+-- oi: one way only
+fn find_user(id: UserId) -> Result[User, UserError]
+  with db
+{
+  let user = db.query(id)?
+  match user {
+    Some(u) => Ok(u)
+    None    => Err(UserError.NotFound { id })
+  }
+}
+```
+
+**Side effects — invisible vs. declared:**
+```elixir
+# Elixir: this signature reveals nothing about what the function touches
+def process_payment(order_id) do
+  order = Repo.get!(Order, order_id)     # DB
+  Logger.info("Processing #{order_id}")  # Log
+  PaymentGateway.charge(order.amount)     # Network
+  Mailer.send_receipt(order.email)        # Network
+end
+```
+
+```oi
+-- oi: every side effect visible in the signature
+fn process_payment(order_id: OrderId) -> Result[Receipt, PaymentError]
+  with db, log, network
+{
+  let order = db.get(order_id)?
+  log.info("Processing {order_id}")
+  let receipt = network.charge(order.amount)?
+  network.send_receipt(order.email)?
+  Ok(receipt)
+}
+```
 
 ### vs. Rust
 - **Similarity**: Both emphasize rigorous correctness (Result types, immutability by default).
@@ -40,7 +119,9 @@ fn find_user<'a>(db: &'a DbPool, id: UserId) -> Result<&'a User, AppError> {
 
 ```oi
 -- oi: no lifetimes, effects declared explicitly
-fn find_user(id: UserId) -> Result[User, AppError] with db {
+fn find_user(id: UserId) -> Result[User, AppError]
+  with db
+{
   let user = db.query(id)?
   match user {
     Some(u) => Ok(u)

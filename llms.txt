@@ -4,6 +4,8 @@
 This is the repository for the `oi` programming language.
 `oi` is an experimental programming language designed specifically for AI-human collaboration. It aims to reduce ambiguity for AI models generating code, while maximizing readability for humans reviewing it.
 
+Its architectural foundation — actor-based concurrency, per-process GC, immutability by default, and pipeline-oriented data flow — is inherited from **Elixir/Erlang (BEAM)**. `oi` reinforces this proven philosophy by adding static types, an explicit effect system, unified error handling, and Design-by-Contract.
+
 ## Core Principles
 1. **One Canonical Form**: Unified formatting, exactly one way to write anything.
 2. **Explicit but Concise**: No hidden implicit behaviors or casting.

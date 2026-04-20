@@ -1,6 +1,14 @@
 # Design Principles
 
-The `oi` language is purpose-built for an era where AI generates code and humans review, maintain, and architect it. To achieve this, it adheres strictly to five core principles:
+The `oi` language is purpose-built for an era where AI generates code and humans review, maintain, and architect it. To achieve this, it adheres strictly to five core principles.
+
+## Philosophical Lineage
+
+`oi` is not designed in a vacuum. Its architectural foundation — actor-based concurrency, per-process garbage collection, immutability by default, and pipeline-oriented data flow — comes directly from **Elixir/Erlang and the BEAM ecosystem**, a platform proven at scale over 30+ years.
+
+Where `oi` diverges is not in philosophy but in **reinforcement**. Elixir's core ideas are sound, but its dynamic type system, invisible side effects, and inconsistent error handling create friction in practice — especially for AI-generated code. `oi` addresses these gaps with a static type system, an explicit effect system (`with`), unified error handling (`Result[T, E]`), and Design-by-Contract (`requires`/`ensures`).
+
+In short: **Elixir got the architecture right. `oi` adds the guardrails.**
 
 ## 1. One Canonical Form
 
