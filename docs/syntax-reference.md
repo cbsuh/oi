@@ -240,7 +240,7 @@ if should_log {
 ```
 
 ### Control Flow Parentheses Rule
-Control flow keywords (`if`, `match`, `for`) do **not** require parentheses around their condition or subject (see ADR-0014). Expression grouping parentheses are allowed but `oi-fmt` strips unnecessary outermost parentheses.
+Control flow keywords (`if`, `match`, `for`, `while`) do **not** require parentheses around their condition or subject (see ADR-0014). Expression grouping parentheses are allowed but `oi-fmt` strips unnecessary outermost parentheses.
 
 ```oi
 -- ✅ Canonical form
@@ -252,6 +252,84 @@ if (age >= 18) { ... }
 -- ✅ Internal grouping parentheses are preserved
 if (a > 1) || (a == -1) { ... }
 ```
+
+## Loops
+
+oi provides two loop constructs: `for` (collection/range iteration) and `while` (conditional repetition). Loops are **statements** — they always return Unit `()`. There is no `break` or `continue`; all early termination is handled by pipeline operations like `find`, `take_while`, and `filter` (see ADR-0015).
+
+### `for` — Collection and Range Iteration
+
+`for` iterates over every element in a collection or range. It always processes the entire sequence.
+
+```oi
+-- Iterate over a collection
+for item in items {
+  io.println(item.to_string())
+}
+
+-- Range syntax: .. (exclusive end), ..= (inclusive end)
+for i in 0..10 {
+  io.println(i.to_string())   -- 0, 1, 2, ..., 9
+}
+
+for i in 1..=5 {
+  io.println(i.to_string())   -- 1, 2, 3, 4, 5
+}
+
+-- Destructuring
+for (key, value) in entries {
+  io.println("{key}: {value}")
+}
+
+-- Accumulation with var (ADR-0002)
+fn sum_prices(orders: List[Order]) -> Money {
+  var total = Money(0)
+  for order in orders {
+    total = total + order.price
+  }
+  total
+}
+```
+
+### `while` — Conditional Repetition
+
+`while` repeats its body as long as the condition is true. The loop exits **only** when the condition becomes false.
+
+```oi
+var retries = 0
+var connected = false
+while !connected && retries < max_retries {
+  connected = try_connect().is_ok()
+  if !connected { retries = retries + 1 }
+}
+```
+
+### No `break` / `continue`
+
+oi intentionally omits `break` and `continue` (ADR-0015). All loop control flow is structured:
+
+```oi
+-- ✅ Need early termination from a collection? Use pipeline.
+let found = items |> find(|x| x.matches(query))
+let valid = items |> filter(|x| !x.is_invalid())
+let first_10 = items |> take_while(|x| x.score > 0)
+
+-- ✅ Need conditional repetition? Use while with composed conditions.
+var done = false
+while !done {
+  let result = process_next()
+  done = result.is_complete()
+}
+
+-- ✅ Need infinite event processing? Use actors (ADR-0013).
+actor Listener {
+  on Message { data: String } {
+    process(data)
+  }
+}
+```
+
+> **Rule**: `for` = iterate entire collection. `while` = repeat until condition is false. For early termination, use `|>` pipeline operations. For infinite loops, use `actor`.
 
 ## Pattern Matching
 Pattern matching replaces complex `if-else` chains. Exhaustive matching is required. You can add extra conditional logic using `if` guards.
