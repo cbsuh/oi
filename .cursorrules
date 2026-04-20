@@ -17,6 +17,8 @@ You are assisting a developer working on the `oi` programming language repositor
 11. **Numeric Literals**: Support decimal (`42`), hex (`0xFF`), binary (`0b1010`), octal (`0o777`), `_` separators (`1_000_000`), and scientific notation (`6.022e23`). Do NOT use type suffixes like `42u8` — use explicit type annotations instead (`let b: UInt8 = 255`).
 12. **Collection Literals**: Use `[]` for List literals, `()` for Tuple literals. Map and Set use named constructors: `Map.from([...])` and `Set.from([...])`. Do NOT invent special sigils like `#{}` or `#{}`.
 13. **Unit Type**: Use `Unit` (not `()`) for functions that return no meaningful value. Write `-> Unit`, not `-> ()`. `Unit` is both the type and the value.
+14. **Modules**: Every `.oi` file must start with `module ModuleName`. One module per file. File names are `snake_case`, module names are `PascalCase` (`user_service.oi` → `module UserService`). No nested modules — use directories for sub-modules.
+15. **Imports**: Use `use` with individual (`use core.Result`), grouped (`use core.{Result, Error}`), or aliased (`use db.Connection as Conn`) forms. Do NOT use wildcards (`use core.*` is forbidden). Every imported symbol must be explicitly listed.
 ## Project Contribution Rules
 - When writing documentation, keep it concise, structured, and machine-parseable where applicable.
 - If proposing new features or grammar, you must assess its impact on:

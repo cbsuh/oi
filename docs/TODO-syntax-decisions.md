@@ -17,13 +17,11 @@
 - [x] 문자 타입 (`Char` 미도입, `String`만) → **ADR-0016**
 - [x] 컬렉션 리터럴 (`[]`, `()`, `Map.from()`, `Set.from()`) → **ADR-0016**
 - [x] Unit 타입 (`Unit` 키워드) → **ADR-0016**
+- [x] 모듈 ↔ 파일 관계 (명시적 1:1, 중첩 없음) → **ADR-0017**
+- [x] `use` 규칙 (개별/그룹/aliasing, 와일드카드 금지) → **ADR-0017**
+- [x] 패키지 구조 (디렉토리 = 네임스페이스, `oi.toml` Phase 3+) → **ADR-0017**
 
 ## 🔴 Tier 1 — Phase 2 파서 착수 전 반드시 결정
-
-### 모듈 시스템 상세
-- [ ] 모듈 ↔ 파일 관계: 1 파일 = 1 모듈? 중첩 모듈?
-- [ ] `use` 세부 규칙: 와일드카드 (`use core.*`), aliasing (`use db.Connection as Conn`)
-- [ ] 패키지/의존성: multi-file import 규칙
 
 ### Effect System 정밀 문법
 - [ ] Effect 합성/전파 규칙: callee의 effect가 caller에 자동 전파되는가?

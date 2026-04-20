@@ -3,13 +3,54 @@
 This document provides a high-level overview of the `oi` syntax. The syntax is designed to be highly structured and unambiguous.
 
 ## Modules and Imports
-`oi` uses the `module` and `use` keywords. We avoid having aliases like `import`, `require`, or `include` to adhere to "One Canonical Form".
+`oi` uses the `module` and `use` keywords. We avoid having aliases like `import`, `require`, or `include` to adhere to "One Canonical Form" (ADR-0017).
+
+### Module Declaration
+
+Every `.oi` file must begin with a `module` declaration. Exactly one module per file. File names use `snake_case`; module names use `PascalCase`. The compiler verifies consistency.
 
 ```oi
+-- File: src/user_service.oi
 module UserService
   use core.{Result, Error}
   use db.Connection
 ```
+
+> **Rule**: No nested modules. Sub-modules are expressed through directory structure, not nested `module` blocks.
+
+### Import Forms
+
+Three import forms are supported. Wildcards (`*`) are **not** supported — every imported symbol must be explicitly listed.
+
+```oi
+use core.Result                        -- Individual import
+use core.{Result, Error}               -- Grouped import
+use db.Connection as Conn              -- Aliased import
+
+-- use core.*                          -- ❌ Wildcards are forbidden
+```
+
+### Directory = Namespace
+
+The directory structure determines module paths. Subdirectories create dotted namespaces.
+
+```
+src/
+  main.oi                   → module Main
+  user_service.oi           → module UserService
+  db/
+    connection.oi           → module db.Connection
+    query.oi                → module db.Query
+  auth/
+    service.oi              → module auth.Service
+```
+
+```oi
+-- use db.Connection → resolves to src/db/connection.oi
+use db.{Connection, Query}
+use auth.Service as AuthService
+```
+
 
 ## Visibility
 
